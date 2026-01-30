@@ -57,6 +57,23 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        risk: {
+          low: "hsl(var(--risk-low))",
+          "low-bg": "hsl(var(--risk-low-bg))",
+          "low-border": "hsl(var(--risk-low-border))",
+          medium: "hsl(var(--risk-medium))",
+          "medium-bg": "hsl(var(--risk-medium-bg))",
+          "medium-border": "hsl(var(--risk-medium-border))",
+          high: "hsl(var(--risk-high))",
+          "high-bg": "hsl(var(--risk-high-bg))",
+          "high-border": "hsl(var(--risk-high-border))",
+        },
+        stage: {
+          idea: "hsl(var(--stage-idea))",
+          dev: "hsl(var(--stage-dev))",
+          beta: "hsl(var(--stage-beta))",
+          live: "hsl(var(--stage-live))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
