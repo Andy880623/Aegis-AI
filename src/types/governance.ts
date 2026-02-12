@@ -1,33 +1,60 @@
-export type FeatureStage = 'Idea' | 'In Development' | 'Beta' | 'Live';
-export type AIType = 'LLM feature' | 'Recommendation-Ranking' | 'Classification-Detection' | 'Other';
-export type ModelSource = 'Internal model' | 'External API' | 'Open-source self-hosted';
-export type AutonomyLevel = 'Suggestion only' | 'Human reviews output' | 'Fully automated';
+export type SystemType = 'Machine Learning Model' | 'LLM Application' | 'LLM with RAG';
+export type ImpactLevel = 'Low' | 'Medium' | 'High';
+export type AutomationLevel = 'Fully automated' | 'Human review sometimes' | 'Always human reviewed';
 export type RiskTier = 'Low' | 'Medium' | 'High';
 
-export type UserDataType = 
-  | 'none'
-  | 'account info'
-  | 'user-generated content'
-  | 'sensitive: health/financial/identity'
-  | 'internal confidential'
-  | 'public';
+export interface InterviewData {
+  system_name: string;
+  system_type: SystemType;
+  is_customer_facing: boolean;
+  impact_level: ImpactLevel;
+  automation_level: AutomationLevel;
+  uses_personal_data: boolean;
+  data_sources: string;
+  has_robustness_testing: boolean;
+  has_bias_testing: boolean;
+  has_security_testing: boolean;
+  has_model_card: boolean;
+}
 
-export type TargetUser = 
-  | 'internal employees'
-  | 'general users'
-  | 'enterprise customers'
-  | 'minors';
+export interface ValidationGaps {
+  robustness: string;
+  fairness: string;
+  safety: string;
+  explainability: string;
+}
 
-export type ImpactType = 
-  | 'affects eligibility/access'
-  | 'financial outcomes'
-  | 'content visibility/moderation'
-  | 'none';
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  priority: 'high' | 'recommended';
+  objective: string;
+  steps: string[];
+  tools: string[];
+  evidence: string[];
+}
+
+export interface GovernanceResult {
+  risk_tier: RiskTier;
+  risk_explanation: string;
+  validation_gaps: ValidationGaps;
+  checklist: ChecklistItem[];
+  gap_scores: {
+    robustness: number;
+    fairness: number;
+    safety: number;
+    explainability: number;
+  };
+}
 
 export interface Safeguards {
   human_oversight: boolean;
   logging_monitoring: boolean;
   abuse_mitigation: boolean;
+  robustness_testing?: boolean;
+  bias_testing?: boolean;
+  security_testing?: boolean;
+  has_model_card?: boolean;
 }
 
 export interface CategoryScores {
@@ -43,16 +70,19 @@ export interface AIFeature {
   name: string;
   product_name: string | null;
   team: string | null;
-  stage: FeatureStage;
+  stage: string | null;
   description: string | null;
-  ai_type: AIType | null;
-  model_source: ModelSource | null;
-  autonomy_level: AutonomyLevel | null;
-  user_data_types: UserDataType[];
+  ai_type: string | null;
+  model_source: string | null;
+  autonomy_level: string | null;
+  user_data_types: string[];
   external_data_transfer: boolean;
-  target_users: TargetUser[];
-  impact_types: ImpactType[];
+  target_users: string[];
+  impact_types: string[];
   safeguards: Safeguards;
+  is_customer_facing: boolean;
+  impact_level: string | null;
+  data_sources: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -74,20 +104,4 @@ export interface Report {
   assessment_id: string;
   report_markdown: string;
   created_at: string;
-}
-
-export interface AIFeatureFormData {
-  name: string;
-  product_name: string;
-  team: string;
-  stage: FeatureStage;
-  description: string;
-  ai_type: AIType | '';
-  model_source: ModelSource | '';
-  autonomy_level: AutonomyLevel | '';
-  user_data_types: UserDataType[];
-  external_data_transfer: boolean;
-  target_users: TargetUser[];
-  impact_types: ImpactType[];
-  safeguards: Safeguards;
 }

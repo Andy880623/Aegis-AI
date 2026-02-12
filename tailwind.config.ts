@@ -68,11 +68,9 @@ export default {
           "high-bg": "hsl(var(--risk-high-bg))",
           "high-border": "hsl(var(--risk-high-border))",
         },
-        stage: {
-          idea: "hsl(var(--stage-idea))",
-          dev: "hsl(var(--stage-dev))",
-          beta: "hsl(var(--stage-beta))",
-          live: "hsl(var(--stage-live))",
+        priority: {
+          high: "hsl(var(--priority-high))",
+          recommended: "hsl(var(--priority-recommended))",
         },
       },
       borderRadius: {

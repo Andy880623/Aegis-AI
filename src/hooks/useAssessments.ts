@@ -1,22 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
-import type { Assessment, AIFeature, CategoryScores } from '@/types/governance';
-import { runHeuristicAssessment } from '@/lib/assessment';
+import type { Assessment, AIFeature, CategoryScores, InterviewData } from '@/types/governance';
+import { runGovernanceAnalysis } from '@/lib/assessment';
 import { toast } from 'sonner';
 
-type DbAssessment = {
-  id: string;
-  ai_feature_id: string;
-  risk_tier: string;
-  rationale: string[] | null;
-  category_scores: unknown;
-  gaps: string[] | null;
-  recommendations: string[] | null;
-  created_at: string;
-};
-
-function mapDbToAssessment(db: DbAssessment): Assessment {
+function mapDbToAssessment(db: any): Assessment {
   const categoryScores = db.category_scores as CategoryScores | null;
   return {
     id: db.id,
@@ -50,7 +39,7 @@ export function useLatestAssessment(featureId: string) {
 
       if (error) throw error;
       if (!data) return null;
-      return mapDbToAssessment(data as DbAssessment);
+      return mapDbToAssessment(data);
     },
     enabled: !!featureId,
   });
@@ -60,17 +49,29 @@ export function useRunAssessment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (feature: AIFeature) => {
-      // Run heuristic assessment (can be replaced with LLM call later)
-      const result = runHeuristicAssessment(feature);
+    mutationFn: async ({ feature, interview }: { feature: AIFeature; interview: InterviewData }) => {
+      const result = runGovernanceAnalysis(interview);
+
+      const categoryScores: CategoryScores = {
+        privacy: interview.uses_personal_data ? 4 : 1,
+        safety_misuse: result.gap_scores.safety,
+        fairness: result.gap_scores.fairness,
+        transparency: result.gap_scores.explainability,
+        accountability: interview.automation_level === 'Fully automated' ? 4 : 1,
+      };
 
       const insertData = {
         ai_feature_id: feature.id,
         risk_tier: result.risk_tier as 'Low' | 'Medium' | 'High',
-        rationale: result.rationale,
-        category_scores: result.category_scores as unknown as Json,
-        gaps: result.gaps,
-        recommendations: result.recommendations,
+        rationale: [result.risk_explanation],
+        category_scores: categoryScores as unknown as Json,
+        gaps: [
+          result.validation_gaps.robustness,
+          result.validation_gaps.fairness,
+          result.validation_gaps.safety,
+          result.validation_gaps.explainability,
+        ],
+        recommendations: result.checklist.map(c => c.title),
       };
 
       const { data, error } = await supabase
@@ -80,15 +81,14 @@ export function useRunAssessment() {
         .single();
 
       if (error) throw error;
-      return mapDbToAssessment(data as DbAssessment);
+      return mapDbToAssessment(data);
     },
-    onSuccess: (_, feature) => {
-      queryClient.invalidateQueries({ queryKey: ['assessment', feature.id] });
-      queryClient.invalidateQueries({ queryKey: ['ai-features'] });
-      toast.success('Governance assessment completed');
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['assessment', variables.feature.id] });
+      toast.success('AI Governance analysis complete');
     },
     onError: (error) => {
-      toast.error(`Assessment failed: ${error.message}`);
+      toast.error(`Analysis failed: ${error.message}`);
     },
   });
 }

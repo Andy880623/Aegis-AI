@@ -3,11 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import NewFeature from "./pages/NewFeature";
-import FeatureDetail from "./pages/FeatureDetail";
-import ReportPage from "./pages/ReportPage";
-import About from "./pages/About";
+import Landing from "./pages/Landing";
+import Interview from "./pages/Interview";
+import Results from "./pages/Results";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,11 +18,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/new" element={<NewFeature />} />
-          <Route path="/feature/:id" element={<FeatureDetail />} />
-          <Route path="/feature/:id/report" element={<ReportPage />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/interview" element={<Interview />} />
+          <Route path="/results/:id" element={<Results />} />
+          <Route path="/reports/:id" element={<Reports />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
