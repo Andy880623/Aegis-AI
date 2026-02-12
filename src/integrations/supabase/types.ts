@@ -19,10 +19,13 @@ export type Database = {
           ai_type: Database["public"]["Enums"]["ai_type"] | null
           autonomy_level: Database["public"]["Enums"]["autonomy_level"] | null
           created_at: string
+          data_sources: string | null
           description: string | null
           external_data_transfer: boolean | null
           id: string
+          impact_level: string | null
           impact_types: string[] | null
+          is_customer_facing: boolean | null
           model_source: Database["public"]["Enums"]["model_source"] | null
           name: string
           product_name: string | null
@@ -37,10 +40,13 @@ export type Database = {
           ai_type?: Database["public"]["Enums"]["ai_type"] | null
           autonomy_level?: Database["public"]["Enums"]["autonomy_level"] | null
           created_at?: string
+          data_sources?: string | null
           description?: string | null
           external_data_transfer?: boolean | null
           id?: string
+          impact_level?: string | null
           impact_types?: string[] | null
+          is_customer_facing?: boolean | null
           model_source?: Database["public"]["Enums"]["model_source"] | null
           name: string
           product_name?: string | null
@@ -55,10 +61,13 @@ export type Database = {
           ai_type?: Database["public"]["Enums"]["ai_type"] | null
           autonomy_level?: Database["public"]["Enums"]["autonomy_level"] | null
           created_at?: string
+          data_sources?: string | null
           description?: string | null
           external_data_transfer?: boolean | null
           id?: string
+          impact_level?: string | null
           impact_types?: string[] | null
+          is_customer_facing?: boolean | null
           model_source?: Database["public"]["Enums"]["model_source"] | null
           name?: string
           product_name?: string | null
@@ -164,10 +173,15 @@ export type Database = {
         | "Recommendation-Ranking"
         | "Classification-Detection"
         | "Other"
+        | "Machine Learning Model"
+        | "LLM Application"
+        | "LLM with RAG"
       autonomy_level:
         | "Suggestion only"
         | "Human reviews output"
         | "Fully automated"
+        | "Human review sometimes"
+        | "Always human reviewed"
       feature_stage: "Idea" | "In Development" | "Beta" | "Live"
       model_source:
         | "Internal model"
@@ -306,11 +320,16 @@ export const Constants = {
         "Recommendation-Ranking",
         "Classification-Detection",
         "Other",
+        "Machine Learning Model",
+        "LLM Application",
+        "LLM with RAG",
       ],
       autonomy_level: [
         "Suggestion only",
         "Human reviews output",
         "Fully automated",
+        "Human review sometimes",
+        "Always human reviewed",
       ],
       feature_stage: ["Idea", "In Development", "Beta", "Live"],
       model_source: [
