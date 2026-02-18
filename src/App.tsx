@@ -2,14 +2,23 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import Landing from "./pages/Landing";
-import Interview from "./pages/Interview";
-import Results from "./pages/Results";
-import Reports from "./pages/Reports";
+import Dashboard from "./pages/Dashboard";
+import Workspace from "./pages/Workspace";
+import AISystems from "./pages/AISystems";
+import AISystemDetail from "./pages/AISystemDetail";
+import ControlsPage from "./pages/Controls";
+import ReportsPage from "./pages/Reports";
+import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function LegacyFeatureRedirect() {
+  const { id } = useParams();
+  return <Navigate to={id ? `/systems/${id}` : "/systems"} replace />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -19,10 +28,20 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/interview" element={<Interview />} />
-          <Route path="/results/:id" element={<Results />} />
-          <Route path="/reports/:id" element={<Reports />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/workspace" element={<Workspace />} />
+          <Route path="/systems" element={<AISystems />} />
+          <Route path="/systems/:id" element={<AISystemDetail />} />
+          <Route path="/controls" element={<ControlsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+
+          {/* Legacy route compatibility */}
+          <Route path="/new" element={<Navigate to="/workspace" replace />} />
+          <Route path="/feature/:id" element={<LegacyFeatureRedirect />} />
+          <Route path="/feature/:id/report" element={<Navigate to="/reports" replace />} />
+          <Route path="/about" element={<Navigate to="/dashboard" replace />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

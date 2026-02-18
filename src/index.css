@@ -2,37 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aegis AI – Notion + Stripe Dashboard Design System */
+/* AI Governance Copilot - Clean Internal Tool Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 224 71% 4%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-
+    --background: 210 28% 97%;
+    --surface: 0 0% 100%;
+    --text: 222 47% 11%;
+    --mutedText: 215 16% 42%;
+    --border: 214 28% 88%;
     --primary: 221 83% 53%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --danger: 0 84% 60%;
+    --aiBubble: 216 45% 95%;
+    --userBubble: 221 88% 56%;
+
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
-
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-
-    --accent: 220 14% 96%;
-    --accent-foreground: 224 71% 4%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: var(--text);
+    --muted: 214 32% 93%;
+    --muted-foreground: var(--mutedText);
+    --accent: 214 32% 93%;
+    --accent-foreground: var(--text);
+    --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
-
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221 83% 53%;
+    --input: var(--border);
+    --ring: var(--primary);
 
     --radius: 0.5rem;
 
@@ -40,78 +41,81 @@
     --risk-low: 142 71% 45%;
     --risk-low-bg: 142 76% 96%;
     --risk-low-border: 142 71% 85%;
-
+    
     --risk-medium: 38 92% 50%;
-    --risk-medium-bg: 48 96% 96%;
+    --risk-medium-bg: 38 92% 96%;
     --risk-medium-border: 38 92% 75%;
-
+    
     --risk-high: 0 84% 60%;
     --risk-high-bg: 0 84% 97%;
     --risk-high-border: 0 84% 85%;
 
-    /* Priority colors */
-    --priority-high: 0 84% 60%;
-    --priority-recommended: 38 92% 50%;
+    /* Stage colors */
+    --stage-idea: 263 70% 60%;
+    --stage-dev: 221 83% 53%;
+    --stage-beta: 38 92% 50%;
+    --stage-live: 142 71% 45%;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 224 71% 4%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 214 32% 91%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 224 71% 4%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent-foreground: 214 32% 91%;
+    --sidebar-border: 222 47% 18%;
     --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 210 20% 98%;
+    --background: 222 47% 7%;
+    --surface: 222 34% 11%;
+    --text: 214 32% 91%;
+    --mutedText: 215 20% 68%;
+    --border: 222 30% 22%;
+    --primary: 217 91% 62%;
+    --success: 142 63% 46%;
+    --warning: 39 92% 55%;
+    --danger: 0 72% 58%;
+    --aiBubble: 222 30% 18%;
+    --userBubble: 217 91% 62%;
 
-    --card: 224 71% 7%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 224 71% 7%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 221 83% 53%;
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 215 28% 17%;
-    --muted-foreground: 218 11% 65%;
-
-    --accent: 215 28% 17%;
-    --accent-foreground: 210 20% 98%;
-
-    --destructive: 0 63% 31%;
+    --secondary: 222 30% 18%;
+    --secondary-foreground: var(--text);
+    --muted: 222 30% 18%;
+    --muted-foreground: var(--mutedText);
+    --accent: 222 30% 18%;
+    --accent-foreground: var(--text);
+    --destructive: var(--danger);
     --destructive-foreground: 0 0% 100%;
-
-    --border: 215 28% 17%;
-    --input: 215 28% 17%;
-    --ring: 221 83% 53%;
+    --input: var(--border);
+    --ring: var(--primary);
 
     --risk-low: 142 71% 45%;
-    --risk-low-bg: 142 50% 12%;
-    --risk-low-border: 142 50% 25%;
-
+    --risk-low-bg: 142 50% 15%;
+    --risk-low-border: 142 50% 30%;
+    
     --risk-medium: 38 92% 50%;
-    --risk-medium-bg: 38 50% 12%;
-    --risk-medium-border: 38 50% 25%;
-
+    --risk-medium-bg: 38 50% 15%;
+    --risk-medium-border: 38 50% 30%;
+    
     --risk-high: 0 84% 60%;
-    --risk-high-bg: 0 50% 12%;
-    --risk-high-border: 0 50% 25%;
+    --risk-high-bg: 0 50% 15%;
+    --risk-high-border: 0 50% 30%;
 
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 210 20% 98%;
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 214 32% 91%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 28% 17%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 28% 17%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 214 32% 91%;
+    --sidebar-border: 222 47% 12%;
     --sidebar-ring: 221 83% 53%;
   }
 }
@@ -119,6 +123,9 @@
 @layer base {
   * {
     @apply border-border;
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
   }
 
   body {
@@ -128,11 +135,11 @@
 }
 
 @layer components {
-  .aegis-container {
-    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  .governance-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  .aegis-section {
-    @apply bg-card rounded-xl border border-border p-6 shadow-sm;
+  .governance-section {
+    @apply bg-card rounded-lg border border-border p-6 shadow-sm;
   }
 }
