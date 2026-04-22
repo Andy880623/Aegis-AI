@@ -30,6 +30,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/workspace" element={<Workspace />} />
+          <Route path="/interview" element={<Navigate to="/workspace" replace />} />
           <Route path="/systems" element={<AISystems />} />
           <Route path="/systems/:id" element={<AISystemDetail />} />
           <Route path="/controls" element={<ControlsPage />} />
