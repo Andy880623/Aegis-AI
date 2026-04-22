@@ -10,7 +10,7 @@ import {
   Workflow,
   Zap,
 } from "lucide-react";
-import type { ComponentType } from "react";
+import { forwardRef, type ComponentType } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -187,19 +187,17 @@ function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: s
   );
 }
 
-function StepCard({
-  step,
-  icon: Icon,
-  title,
-  description,
-}: {
-  step: string;
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
+const StepCard = forwardRef<
+  HTMLDivElement,
+  {
+    step: string;
+    icon: ComponentType<{ className?: string }>;
+    title: string;
+    description: string;
+  }
+>(function StepCard({ step, icon: Icon, title, description }, ref) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card/60 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_8px_32px_-12px_hsl(var(--primary)/0.4)]">
+    <div ref={ref} className="group relative overflow-hidden rounded-xl border border-border bg-card/60 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_8px_32px_-12px_hsl(var(--primary)/0.4)]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-accent-violet/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:from-primary/5 group-hover:to-accent-violet/5" />
       <div className="relative flex items-start justify-between">
         <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-primary transition-colors group-hover:border-primary/40 group-hover:text-primary-glow">
@@ -211,19 +209,18 @@ function StepCard({
       <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
     </div>
   );
-}
+});
 
-function BuiltForCard({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
+const BuiltForCard = forwardRef<
+  HTMLDivElement,
+  {
+    icon: ComponentType<{ className?: string }>;
+    title: string;
+    description: string;
+  }
+>(function BuiltForCard({ icon: Icon, title, description }, ref) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-5 backdrop-blur transition-all duration-300 hover:border-primary/40 hover:bg-card/70">
+    <div ref={ref} className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-5 backdrop-blur transition-all duration-300 hover:border-primary/40 hover:bg-card/70">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-accent-violet/20 text-primary">
         <Icon className="h-4 w-4" />
       </div>
@@ -231,4 +228,4 @@ function BuiltForCard({
       <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
     </div>
   );
-}
+});
