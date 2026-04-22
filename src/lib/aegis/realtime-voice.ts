@@ -227,7 +227,7 @@ export function createRealtimeVoiceSession(callbacks: RealtimeCallbacks): Realti
 
       remoteAudioEl = document.createElement("audio");
       remoteAudioEl.autoplay = true;
-      remoteAudioEl.playsInline = true;
+      (remoteAudioEl as HTMLAudioElement & { playsInline?: boolean }).playsInline = true;
       remoteAudioEl.style.display = "none";
       document.body.appendChild(remoteAudioEl);
       pc.ontrack = (event) => {
