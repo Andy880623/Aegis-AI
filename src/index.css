@@ -2,135 +2,118 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Governance Copilot - Clean Internal Tool Design System */
+/* Aegis AI - Dark Tech Operations Design System (Datadog/Grafana-inspired) */
 
 @layer base {
   :root {
+    /* Dark-first base — calm telemetry palette */
+    --background: 222 39% 6%;
+    --surface: 222 32% 9%;
+    --surface-elevated: 222 28% 12%;
+    --text: 210 30% 96%;
+    --mutedText: 215 16% 60%;
+    --border: 222 24% 16%;
+    --border-strong: 222 22% 22%;
+    --primary: 199 89% 58%;
+    --primary-glow: 199 100% 68%;
+    --accent-cyan: 187 92% 55%;
+    --accent-violet: 258 90% 66%;
+    --success: 152 76% 50%;
+    --warning: 38 95% 58%;
+    --danger: 354 84% 62%;
+    --aiBubble: 222 30% 14%;
+    --userBubble: 199 89% 58%;
+
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
+    --primary-foreground: 222 47% 8%;
+    --secondary: 222 24% 14%;
+    --secondary-foreground: var(--text);
+    --muted: 222 24% 13%;
+    --muted-foreground: var(--mutedText);
+    --accent: 222 24% 16%;
+    --accent-foreground: var(--text);
+    --destructive: var(--danger);
+    --destructive-foreground: 210 30% 98%;
+    --input: var(--border);
+    --ring: var(--primary);
+
+    --radius: 0.625rem;
+
+    /* Risk tier — telemetry semantics */
+    --risk-low: 152 76% 50%;
+    --risk-low-bg: 152 60% 12%;
+    --risk-low-border: 152 55% 24%;
+
+    --risk-medium: 38 95% 58%;
+    --risk-medium-bg: 38 65% 12%;
+    --risk-medium-border: 38 60% 26%;
+
+    --risk-high: 354 84% 62%;
+    --risk-high-bg: 354 60% 14%;
+    --risk-high-border: 354 60% 28%;
+
+    /* Priority */
+    --priority-high: 354 84% 62%;
+    --priority-recommended: 38 95% 58%;
+
+    /* Sidebar */
+    --sidebar-background: 222 39% 5%;
+    --sidebar-foreground: 210 25% 88%;
+    --sidebar-primary: 199 89% 58%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-accent: 222 28% 11%;
+    --sidebar-accent-foreground: 210 25% 92%;
+    --sidebar-border: 222 24% 14%;
+    --sidebar-ring: 199 89% 58%;
+
+    /* Gradients & shadows */
+    --gradient-hero: radial-gradient(ellipse at top, hsl(199 89% 58% / 0.15), transparent 60%),
+                     radial-gradient(ellipse at bottom right, hsl(258 90% 66% / 0.12), transparent 55%);
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent-violet)));
+    --gradient-cyan: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--primary)));
+    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.2), 0 8px 32px -8px hsl(var(--primary) / 0.35);
+    --shadow-elevated: 0 1px 0 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -12px hsl(222 60% 2% / 0.6);
+    --grid-line: hsl(222 24% 16% / 0.6);
+  }
+
+  /* Light mode kept as a subtle alternate */
+  .light {
     --background: 210 28% 97%;
     --surface: 0 0% 100%;
     --text: 222 47% 11%;
     --mutedText: 215 16% 42%;
     --border: 214 28% 88%;
     --primary: 221 83% 53%;
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
-    --danger: 0 84% 60%;
-    --aiBubble: 216 45% 95%;
-    --userBubble: 221 88% 56%;
-
-    --foreground: var(--text);
-    --card: var(--surface);
-    --card-foreground: var(--text);
-    --popover: var(--surface);
-    --popover-foreground: var(--text);
     --primary-foreground: 0 0% 100%;
-    --secondary: 214 32% 91%;
-    --secondary-foreground: var(--text);
     --muted: 214 32% 93%;
-    --muted-foreground: var(--mutedText);
     --accent: 214 32% 93%;
-    --accent-foreground: var(--text);
-    --destructive: var(--danger);
-    --destructive-foreground: 0 0% 100%;
-    --input: var(--border);
-    --ring: var(--primary);
-
-    --radius: 0.5rem;
-
-    /* Risk tier semantic colors */
-    --risk-low: 142 71% 45%;
+    --secondary: 214 32% 91%;
     --risk-low-bg: 142 76% 96%;
     --risk-low-border: 142 71% 85%;
-    
-    --risk-medium: 38 92% 50%;
     --risk-medium-bg: 38 92% 96%;
     --risk-medium-border: 38 92% 75%;
-    
-    --risk-high: 0 84% 60%;
     --risk-high-bg: 0 84% 97%;
     --risk-high-border: 0 84% 85%;
-
-    /* Stage colors */
-    --stage-idea: 263 70% 60%;
-    --stage-dev: 221 83% 53%;
-    --stage-beta: 38 92% 50%;
-    --stage-live: 142 71% 45%;
-
-    /* Sidebar */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 214 32% 91%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 18%;
-    --sidebar-accent-foreground: 214 32% 91%;
-    --sidebar-border: 222 47% 18%;
-    --sidebar-ring: 221 83% 53%;
-  }
-
-  .dark {
-    --background: 222 47% 7%;
-    --surface: 222 34% 11%;
-    --text: 214 32% 91%;
-    --mutedText: 215 20% 68%;
-    --border: 222 30% 22%;
-    --primary: 217 91% 62%;
-    --success: 142 63% 46%;
-    --warning: 39 92% 55%;
-    --danger: 0 72% 58%;
-    --aiBubble: 222 30% 18%;
-    --userBubble: 217 91% 62%;
-
-    --foreground: var(--text);
-    --card: var(--surface);
-    --card-foreground: var(--text);
-    --popover: var(--surface);
-    --popover-foreground: var(--text);
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 30% 18%;
-    --secondary-foreground: var(--text);
-    --muted: 222 30% 18%;
-    --muted-foreground: var(--mutedText);
-    --accent: 222 30% 18%;
-    --accent-foreground: var(--text);
-    --destructive: var(--danger);
-    --destructive-foreground: 0 0% 100%;
-    --input: var(--border);
-    --ring: var(--primary);
-
-    --risk-low: 142 71% 45%;
-    --risk-low-bg: 142 50% 15%;
-    --risk-low-border: 142 50% 30%;
-    
-    --risk-medium: 38 92% 50%;
-    --risk-medium-bg: 38 50% 15%;
-    --risk-medium-border: 38 50% 30%;
-    
-    --risk-high: 0 84% 60%;
-    --risk-high-bg: 0 50% 15%;
-    --risk-high-border: 0 50% 30%;
-
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 214 32% 91%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 12%;
-    --sidebar-accent-foreground: 214 32% 91%;
-    --sidebar-border: 222 47% 12%;
-    --sidebar-ring: 221 83% 53%;
+    --grid-line: hsl(214 28% 88% / 0.6);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    transition-property: background-color, border-color, color, fill, stroke;
-    transition-duration: 200ms;
-    transition-timing-function: ease-in-out;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(199 89% 58% / 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 110%, hsl(258 90% 66% / 0.06), transparent 60%);
+    background-attachment: fixed;
   }
 }
 
@@ -140,6 +123,104 @@
   }
 
   .governance-section {
-    @apply bg-card rounded-lg border border-border p-6 shadow-sm;
+    @apply bg-card rounded-lg border border-border p-6;
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .aegis-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Animated grid background for hero / shells */
+  .tech-grid {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 80%);
+  }
+
+  .tech-grid-dense {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Glass surface */
+  .glass-panel {
+    background: linear-gradient(180deg, hsl(var(--surface) / 0.8), hsl(var(--surface) / 0.5));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .glow-border {
+    position: relative;
+  }
+  .glow-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.6), transparent 50%, hsl(var(--accent-violet) / 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .pulse-dot {
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.4;
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@layer utilities {
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    80%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+  @keyframes grid-drift {
+    0% { background-position: 0 0; }
+    100% { background-position: 56px 56px; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .animate-grid-drift { animation: grid-drift 20s linear infinite; }
+  .animate-glow-pulse { animation: glow-pulse 4s ease-in-out infinite; }
+  .animate-fade-in { animation: fade-in 0.5s ease-out both; }
+  .animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
