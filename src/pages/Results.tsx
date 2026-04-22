@@ -2,7 +2,6 @@ import { useParams, Link } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAIFeature } from '@/hooks/useAIFeatures';
 import { useLatestAssessment } from '@/hooks/useAssessments';
-import { RiskBadge } from '@/components/ui/risk-badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +20,8 @@ import {
   ArrowRight,
   CheckCircle2,
   XCircle,
+  Activity,
+  Sparkles,
 } from 'lucide-react';
 import { runGovernanceAnalysis } from '@/lib/assessment';
 import type { InterviewData, GovernanceResult, ChecklistItem } from '@/types/governance';
