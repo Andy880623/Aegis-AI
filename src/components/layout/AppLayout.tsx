@@ -30,7 +30,7 @@ export function AppLayout({ children, fullWidth }: AppLayoutProps) {
           <div className="flex items-center gap-2">
             {!isLanding && (
               <nav className="flex items-center gap-1">
-                <NavItem href="/interview" current={location.pathname}>Interview</NavItem>
+                <NavItem href="/workspace" current={location.pathname}>Interview</NavItem>
               </nav>
             )}
             <div className="ml-2 hidden items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground sm:flex">
