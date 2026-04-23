@@ -121,6 +121,86 @@ export type Database = {
           },
         ]
       }
+      rag_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          tokens: number | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          tokens?: number | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          tokens?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rag_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "rag_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rag_documents: {
+        Row: {
+          ai_feature_id: string | null
+          created_at: string
+          full_text: string
+          id: string
+          kind: string
+          metadata: Json | null
+          region: string | null
+          source_url: string | null
+          standard_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_feature_id?: string | null
+          created_at?: string
+          full_text: string
+          id?: string
+          kind: string
+          metadata?: Json | null
+          region?: string | null
+          source_url?: string | null
+          standard_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_feature_id?: string | null
+          created_at?: string
+          full_text?: string
+          id?: string
+          kind?: string
+          metadata?: Json | null
+          region?: string | null
+          source_url?: string | null
+          standard_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           ai_feature_id: string

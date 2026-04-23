@@ -12,6 +12,7 @@ import ControlsPage from "./pages/Controls";
 import ResidualRisk from "./pages/ResidualRisk";
 import ReportsPage from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
+import KnowledgeBasePage from "./pages/KnowledgeBase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/controls" element={<ControlsPage />} />
           <Route path="/residual" element={<ResidualRisk />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/knowledge" element={<KnowledgeBasePage />} />
           <Route path="/settings" element={<SettingsPage />} />
 
           {/* Legacy route compatibility */}
