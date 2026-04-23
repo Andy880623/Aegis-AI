@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Compass,
   LayoutDashboard,
   Search,
   Settings,
@@ -24,6 +25,7 @@ interface AegisShellProps {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Introduction", href: "/introduction", icon: Compass },
   { label: "Repository", href: "/systems", icon: ShieldCheck },
   { label: "Inherent Risk", href: "/workspace", icon: Bot },
   { label: "Controls", href: "/controls", icon: ClipboardList },
