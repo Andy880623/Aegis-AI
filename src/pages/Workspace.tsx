@@ -141,7 +141,7 @@ export default function Workspace() {
           <div>
             <h1 className="text-2xl font-semibold">Inherent Risk Assessment</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              按住左側麥克風與 Aegis 進行語音訪談（台灣男聲），右側問卷會即時自動填寫並可手動編輯。Residual Risk Assessment 會在完成 Controls 後自動產生。
+              Hold the microphone on the left to start a voice interview with Aegis (Taiwanese male voice). The questionnaire on the right auto-fills in real time and remains manually editable. The Residual Risk Assessment will be generated automatically once Controls are completed.
             </p>
           </div>
           <Link to={`/workspace?new=${Date.now()}`}>
