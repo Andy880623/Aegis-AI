@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bot, Loader2, Mic, MicOff, Save, Send } from "lucide-react";
+import { Loader2, Mic, MicOff, Save, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { defaultSystemProfile, normalizeProfile } from "@/lib/aegis/schema";
 import { upsertSystem } from "@/lib/aegis/storage";
@@ -9,6 +8,7 @@ import { createRealtimeVoiceSession, type RealtimeVoiceSession } from "@/lib/aeg
 import { generateAndrewTurn, hasOpenAIConfigured } from "@/lib/aegis/chatgpt";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import type { AI_System_Profile } from "@/types/aegis";
+import { ZoomCallShell } from "./ZoomCallShell";
 
 type ChatMessage = {
   role: "assistant" | "user";
