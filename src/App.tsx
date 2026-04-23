@@ -13,6 +13,7 @@ import ResidualRisk from "./pages/ResidualRisk";
 import ReportsPage from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import KnowledgeBasePage from "./pages/KnowledgeBase";
+import Introduction from "./pages/Introduction";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/introduction" element={<Introduction />} />
           <Route path="/workspace" element={<Workspace />} />
           <Route path="/interview" element={<Navigate to="/workspace" replace />} />
           <Route path="/systems" element={<AISystems />} />
