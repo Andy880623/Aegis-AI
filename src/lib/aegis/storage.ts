@@ -3,6 +3,8 @@ import type { AegisActivityRecord, AegisSystemRecord, AI_System_Profile } from "
 const SYSTEMS_KEY = "aegis:systems";
 const ACTIVITY_KEY = "aegis:activity";
 const CONTROL_PROGRESS_KEY = "aegis:control-progress";
+const CONTROL_STATUS_KEY = "aegis:control-status";
+const CONTROL_EVIDENCE_KEY = "aegis:control-evidence";
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -131,4 +133,92 @@ export function setControlCompleted(systemId: string, controlId: string, complet
 
   map[systemId] = Array.from(current);
   writeJson(CONTROL_PROGRESS_KEY, map);
+
+  // Mirror to status map for backward compat with new residual engine
+  const statusMap = readJson<ControlStatusMap>(CONTROL_STATUS_KEY, {});
+  const systemStatus = { ...(statusMap[systemId] ?? {}) };
+  systemStatus[controlId] = completed ? "completed" : "not_started";
+  statusMap[systemId] = systemStatus;
+  writeJson(CONTROL_STATUS_KEY, statusMap);
+}
+
+export type ControlStatus = "not_started" | "in_progress" | "completed";
+type ControlStatusMap = Record<string, Record<string, ControlStatus>>;
+
+export function getControlStatuses(systemId: string): Record<string, ControlStatus> {
+  const statusMap = readJson<ControlStatusMap>(CONTROL_STATUS_KEY, {});
+  const fromStatus = statusMap[systemId] ?? {};
+
+  // Backfill from legacy completed list
+  const legacy = getCompletedControls(systemId);
+  const merged: Record<string, ControlStatus> = { ...fromStatus };
+  for (const id of legacy) {
+    if (!merged[id]) merged[id] = "completed";
+  }
+  return merged;
+}
+
+export function setControlStatus(systemId: string, controlId: string, status: ControlStatus) {
+  const statusMap = readJson<ControlStatusMap>(CONTROL_STATUS_KEY, {});
+  const systemStatus = { ...(statusMap[systemId] ?? {}) };
+  systemStatus[controlId] = status;
+  statusMap[systemId] = systemStatus;
+  writeJson(CONTROL_STATUS_KEY, statusMap);
+
+  // Keep the legacy completed list in sync for existing UI
+  const progressMap = readJson<ControlProgress>(CONTROL_PROGRESS_KEY, {});
+  const current = new Set(progressMap[systemId] ?? []);
+  if (status === "completed") current.add(controlId);
+  else current.delete(controlId);
+  progressMap[systemId] = Array.from(current);
+  writeJson(CONTROL_PROGRESS_KEY, progressMap);
+}
+
+export interface ControlEvidenceFile {
+  id: string;
+  name: string;
+  size: number;
+  mime_type: string;
+  uploaded_at: string;
+}
+
+type ControlEvidenceMap = Record<string, Record<string, ControlEvidenceFile[]>>;
+
+export function getControlEvidence(systemId: string, controlId: string): ControlEvidenceFile[] {
+  const map = readJson<ControlEvidenceMap>(CONTROL_EVIDENCE_KEY, {});
+  return map[systemId]?.[controlId] ?? [];
+}
+
+export function getAllControlEvidence(systemId: string): Record<string, ControlEvidenceFile[]> {
+  const map = readJson<ControlEvidenceMap>(CONTROL_EVIDENCE_KEY, {});
+  return map[systemId] ?? {};
+}
+
+export function addControlEvidence(
+  systemId: string,
+  controlId: string,
+  file: Omit<ControlEvidenceFile, "id" | "uploaded_at">,
+): ControlEvidenceFile {
+  const map = readJson<ControlEvidenceMap>(CONTROL_EVIDENCE_KEY, {});
+  const systemMap = { ...(map[systemId] ?? {}) };
+  const list = [...(systemMap[controlId] ?? [])];
+  const entry: ControlEvidenceFile = {
+    id: createId("ev"),
+    uploaded_at: new Date().toISOString(),
+    ...file,
+  };
+  list.push(entry);
+  systemMap[controlId] = list;
+  map[systemId] = systemMap;
+  writeJson(CONTROL_EVIDENCE_KEY, map);
+  return entry;
+}
+
+export function removeControlEvidence(systemId: string, controlId: string, evidenceId: string) {
+  const map = readJson<ControlEvidenceMap>(CONTROL_EVIDENCE_KEY, {});
+  const systemMap = { ...(map[systemId] ?? {}) };
+  const list = (systemMap[controlId] ?? []).filter((entry) => entry.id !== evidenceId);
+  systemMap[controlId] = list;
+  map[systemId] = systemMap;
+  writeJson(CONTROL_EVIDENCE_KEY, map);
 }
