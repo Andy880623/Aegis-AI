@@ -308,7 +308,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
   const [chat, setChat] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      text: "你好，我是 Aegis 風險訪談助理。我會先做核心風險盤點，再視情況做深度盤點。請按住下方麥克風按鈕回答我的問題。",
+      text: "Hi, I'm the Aegis risk interview assistant. I'll start with a core risk intake and continue with a deep dive if needed. Please hold the microphone button below to answer my questions.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -398,7 +398,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
       recorderRef.current = recorder;
       await recorder.start();
       setIsRecording(true);
-      setStatus("錄音中…放開按鈕後送出");
+      setStatus("Recording… release the button to send");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Microphone permission denied.");
       setIsRecording(false);
@@ -409,17 +409,17 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
     const recorder = recorderRef.current;
     if (!recorder || !isRecording) return;
     setIsRecording(false);
-    setStatus("辨識中…");
+    setStatus("Transcribing…");
     try {
       const blob = await recorder.stop();
       recorderRef.current = null;
       if (!blob || blob.size < 800) {
-        setStatus("錄音太短，請按住按鈕並完整描述。");
+        setStatus("Recording too short — hold the button and describe fully.");
         return;
       }
       const text = await transcribeAudioBlob(blob);
       if (!text) {
-        setStatus("無法辨識聲音，請再試一次。");
+        setStatus("Couldn't recognize speech — please try again.");
         return;
       }
       setChat((prev) => [...prev, { role: "user", text }]);
@@ -475,7 +475,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
           </div>
           <div className="text-muted-foreground">
             Voice: <span className={openAIConnected ? "text-emerald-400" : "text-amber-400"}>
-              {openAIConnected ? "Ready · 台灣男聲" : "Not configured"}
+              {openAIConnected ? "Ready · TW male voice" : "Not configured"}
             </span>
           </div>
         </div>
@@ -527,17 +527,27 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               isRecording
-                ? "border-destructive bg-destructive text-destructive-foreground scale-110 shadow-[0_0_40px_hsl(var(--destructive)/0.5)]"
+                ? "border-primary bg-primary text-primary-foreground scale-110 shadow-[0_0_40px_hsl(var(--primary)/0.6)]"
                 : "border-primary bg-primary text-primary-foreground hover:scale-105 active:scale-95",
             )}
           >
             <Mic className="h-8 w-8" />
             {isRecording && (
-              <span className="absolute inset-0 rounded-full border-4 border-destructive/40 animate-ping" />
+              <>
+                <span className="pointer-events-none absolute inset-0 rounded-full border-4 border-primary/50 animate-ping" />
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-full border-2 border-primary/40 animate-ping"
+                  style={{ animationDelay: "300ms" }}
+                />
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-full border border-primary/30 animate-ping"
+                  style={{ animationDelay: "600ms" }}
+                />
+              </>
             )}
           </button>
           <p className="text-xs text-muted-foreground">
-            {isRecording ? "鬆開按鈕送出回答" : "按住麥克風開始說話"}
+            {isRecording ? "Release to send your answer" : "Hold the microphone to speak"}
           </p>
         </div>
 
@@ -546,7 +556,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="或在此輸入文字回覆（按 Enter 送出）"
+            placeholder="Or type your reply here (press Enter to send)"
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
