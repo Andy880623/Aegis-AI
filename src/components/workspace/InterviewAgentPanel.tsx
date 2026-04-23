@@ -475,7 +475,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
           </div>
           <div className="text-muted-foreground">
             Voice: <span className={openAIConnected ? "text-emerald-400" : "text-amber-400"}>
-              {openAIConnected ? "Ready · 台灣男聲" : "Not configured"}
+              {openAIConnected ? "Ready · TW male voice" : "Not configured"}
             </span>
           </div>
         </div>
@@ -527,17 +527,27 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               isRecording
-                ? "border-destructive bg-destructive text-destructive-foreground scale-110 shadow-[0_0_40px_hsl(var(--destructive)/0.5)]"
+                ? "border-primary bg-primary text-primary-foreground scale-110 shadow-[0_0_40px_hsl(var(--primary)/0.6)]"
                 : "border-primary bg-primary text-primary-foreground hover:scale-105 active:scale-95",
             )}
           >
             <Mic className="h-8 w-8" />
             {isRecording && (
-              <span className="absolute inset-0 rounded-full border-4 border-destructive/40 animate-ping" />
+              <>
+                <span className="pointer-events-none absolute inset-0 rounded-full border-4 border-primary/50 animate-ping" />
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-full border-2 border-primary/40 animate-ping"
+                  style={{ animationDelay: "300ms" }}
+                />
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-full border border-primary/30 animate-ping"
+                  style={{ animationDelay: "600ms" }}
+                />
+              </>
             )}
           </button>
           <p className="text-xs text-muted-foreground">
-            {isRecording ? "鬆開按鈕送出回答" : "按住麥克風開始說話"}
+            {isRecording ? "Release to send your answer" : "Hold the microphone to speak"}
           </p>
         </div>
 
@@ -546,7 +556,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="或在此輸入文字回覆（按 Enter 送出）"
+            placeholder="Or type your reply here (press Enter to send)"
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
