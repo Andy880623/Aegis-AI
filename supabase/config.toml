@@ -1,1 +1,4 @@
 project_id = "eaiqgujibwxakfxwyzec"
+
+[functions.evidence-scan]
+verify_jwt = false
