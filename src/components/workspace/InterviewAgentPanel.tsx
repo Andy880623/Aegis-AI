@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Mic, MicOff, Save, Send } from "lucide-react";
+import { Loader2, Mic, Save, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { defaultSystemProfile, normalizeProfile } from "@/lib/aegis/schema";
 import { upsertSystem } from "@/lib/aegis/storage";
-import { createRealtimeVoiceSession, type RealtimeVoiceSession } from "@/lib/aegis/realtime-voice";
 import { generateAndrewTurn, hasOpenAIConfigured } from "@/lib/aegis/chatgpt";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
+import {
+  createPttRecorder,
+  speakTaiwaneseMale,
+  transcribeAudioBlob,
+  type PttRecorderHandle,
+} from "@/lib/aegis/ptt-voice";
 import type { AI_System_Profile } from "@/types/aegis";
 import { ZoomCallShell } from "./ZoomCallShell";
 
@@ -302,78 +308,127 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
   const [chat, setChat] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      text: "Hi, I am Aegis. I will complete Core risk intake first, then Deep Dive if needed.",
+      text: "你好，我是 Aegis 風險訪談助理。我會先做核心風險盤點，再視情況做深度盤點。請按住下方麥克風按鈕回答我的問題。",
     },
   ]);
   const [input, setInput] = useState("");
-  const [connected, setConnected] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [status, setStatus] = useState("");
 
-  const sessionRef = useRef<RealtimeVoiceSession | null>(null);
+  const recorderRef = useRef<PttRecorderHandle | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
   const progress = useMemo(() => completionPercent(profile), [profile]);
   const openAIConnected = hasOpenAIConfigured();
 
-  const askNextGuidedQuestion = (targetProfile: AI_System_Profile) => {
-    const guidance = buildGuidedQuestion(targetProfile);
-    setStatus(`Interview stage: ${guidance.stage.toUpperCase()}`);
-    if (connected) {
-      sessionRef.current?.promptAssistant(guidance.question);
+  const stopAudio = () => {
+    try {
+      audioRef.current?.pause();
+    } catch {
+      // ignore
+    }
+    audioRef.current = null;
+    setIsSpeaking(false);
+  };
+
+  const speak = async (text: string) => {
+    if (!text.trim()) return;
+    stopAudio();
+    try {
+      setIsSpeaking(true);
+      const audio = await speakTaiwaneseMale(text);
+      audioRef.current = audio;
+      audio.addEventListener("ended", () => {
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+          setIsSpeaking(false);
+        }
+      });
+    } catch (error) {
+      setIsSpeaking(false);
+      setStatus(error instanceof Error ? error.message : "TTS failed");
     }
   };
 
-  const ensureSession = () => {
-    if (sessionRef.current) return sessionRef.current;
-
-    sessionRef.current = createRealtimeVoiceSession({
-      onUserTranscript: (text) => {
-        setChat((prev) => [...prev, { role: "user", text }]);
-        const patched = mergeTranscriptIntoProfile(text, profileRef.current);
-        onProfileChange(patched);
-        askNextGuidedQuestion(patched);
-      },
-      onAssistantTranscript: (text) => {
-        setChat((prev) => [...prev, { role: "assistant", text }]);
-      },
-      onConnectionChange: (isConnected) => {
-        setConnected(isConnected);
-        setStatus(isConnected ? "Realtime call connected." : "Realtime call disconnected.");
-      },
-      onStatus: (message) => {
-        setStatus(message);
-      },
-      onError: (message) => {
-        setStatus(message);
-      },
-    });
-
-    return sessionRef.current;
-  };
-
-  useEffect(() => {
-    return () => {
-      sessionRef.current?.stop();
-      sessionRef.current = null;
-    };
-  }, []);
-
-  const startCall = async () => {
-    setIsBusy(true);
+  const runAssistantTurn = async (userText: string, patched: AI_System_Profile) => {
+    if (!openAIConnected) {
+      setStatus("OpenAI key not configured. Cannot generate AI response.");
+      return;
+    }
     try {
-      const session = ensureSession();
-      await session.start();
-      askNextGuidedQuestion(profileRef.current);
+      setIsBusy(true);
+      const turn = await generateAndrewTurn([...chat, { role: "user", text: userText }], patched);
+      const next = { ...patched, ...turn.profile_patch };
+      onProfileChange(next);
+      const reply = turn.assistant_reply?.trim();
+      if (reply) {
+        setChat((prev) => [...prev, { role: "assistant", text: reply }]);
+        void speak(reply);
+      }
+      const guidance = buildGuidedQuestion(next);
+      setStatus(`Interview stage: ${guidance.stage.toUpperCase()}`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Failed to get AI response.");
     } finally {
       setIsBusy(false);
     }
   };
 
-  const stopCall = () => {
-    sessionRef.current?.stop();
-    setConnected(false);
+  useEffect(() => {
+    return () => {
+      recorderRef.current?.cancel();
+      recorderRef.current = null;
+      stopAudio();
+    };
+  }, []);
+
+  const handlePttDown = async () => {
+    if (isRecording || isBusy) return;
+    if (!openAIConnected) {
+      setStatus("OpenAI key not configured. Cannot record interview.");
+      return;
+    }
+    stopAudio();
+    try {
+      const recorder = await createPttRecorder();
+      recorderRef.current = recorder;
+      await recorder.start();
+      setIsRecording(true);
+      setStatus("錄音中…放開按鈕後送出");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Microphone permission denied.");
+      setIsRecording(false);
+    }
+  };
+
+  const handlePttUp = async () => {
+    const recorder = recorderRef.current;
+    if (!recorder || !isRecording) return;
+    setIsRecording(false);
+    setStatus("辨識中…");
+    try {
+      const blob = await recorder.stop();
+      recorderRef.current = null;
+      if (!blob || blob.size < 800) {
+        setStatus("錄音太短，請按住按鈕並完整描述。");
+        return;
+      }
+      const text = await transcribeAudioBlob(blob);
+      if (!text) {
+        setStatus("無法辨識聲音，請再試一次。");
+        return;
+      }
+      setChat((prev) => [...prev, { role: "user", text }]);
+      const patched = mergeTranscriptIntoProfile(text, profileRef.current);
+      onProfileChange(patched);
+      await runAssistantTurn(text, patched);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Transcription failed.");
+    }
   };
 
   const sendText = async () => {
@@ -383,30 +438,8 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
     setChat((prev) => [...prev, { role: "user", text }]);
     const patched = mergeTranscriptIntoProfile(text, profileRef.current);
     onProfileChange(patched);
-
-    if (connected) {
-      sessionRef.current?.sendText(text);
-      askNextGuidedQuestion(patched);
-    } else if (openAIConnected) {
-      try {
-        setIsBusy(true);
-        const turn = await generateAndrewTurn([...chat, { role: "user", text }], patched);
-        const next = { ...patched, ...turn.profile_patch };
-        onProfileChange(next);
-        if (turn.assistant_reply) {
-          setChat((prev) => [...prev, { role: "assistant", text: turn.assistant_reply }]);
-        }
-        askNextGuidedQuestion(next);
-      } catch (error) {
-        setStatus(error instanceof Error ? error.message : "Failed to get response from ChatGPT.");
-      } finally {
-        setIsBusy(false);
-      }
-    } else {
-      setStatus("Not connected. Start live call or configure OpenAI key in Settings.");
-    }
-
     setInput("");
+    await runAssistantTurn(text, patched);
   };
 
   const saveProfile = () => {
@@ -426,15 +459,11 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
   return (
     <div className="flex h-full flex-col gap-3">
       <ZoomCallShell
-        isAiSpeaking={isBusy || (connected && chat[chat.length - 1]?.role === "assistant")}
-        isAiListening={connected}
+        isAiSpeaking={isSpeaking || isBusy}
+        isAiListening={isRecording}
         aiCaption={
           [...chat].reverse().find((m) => m.role === "assistant")?.text?.slice(0, 140)
         }
-        userCaption={
-          [...chat].reverse().find((m) => m.role === "user")?.text?.slice(0, 100)
-        }
-        onEndCall={connected ? stopCall : undefined}
       >
         <div className="px-4 py-2 flex items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-3">
@@ -445,11 +474,8 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
             <span className="font-mono text-muted-foreground">{progress}%</span>
           </div>
           <div className="text-muted-foreground">
-            Realtime: <span className={openAIConnected ? "text-emerald-400" : "text-amber-400"}>
-              {openAIConnected ? "Ready" : "Not configured"}
-            </span>
-            {" · "}Call: <span className={connected ? "text-emerald-400" : "text-muted-foreground"}>
-              {connected ? "Live" : "Idle"}
+            Voice: <span className={openAIConnected ? "text-emerald-400" : "text-amber-400"}>
+              {openAIConnected ? "Ready · 台灣男聲" : "Not configured"}
             </span>
           </div>
         </div>
@@ -477,31 +503,59 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
 
         {status ? <p className="text-xs text-muted-foreground">{status}</p> : null}
 
-        <div className="flex gap-2">
-          {!connected ? (
-            <Button type="button" onClick={startCall} disabled={isBusy || !openAIConnected}>
-              <Mic className="mr-1 h-4 w-4" />
-              Start live call
-            </Button>
-          ) : (
-            <Button type="button" variant="destructive" onClick={stopCall}>
-              <MicOff className="mr-1 h-4 w-4" />
-              End call
-            </Button>
-          )}
+        {/* Push-to-talk button */}
+        <div className="flex flex-col items-center gap-2 py-2">
+          <button
+            type="button"
+            onMouseDown={handlePttDown}
+            onMouseUp={handlePttUp}
+            onMouseLeave={() => {
+              if (isRecording) void handlePttUp();
+            }}
+            onTouchStart={(event) => {
+              event.preventDefault();
+              void handlePttDown();
+            }}
+            onTouchEnd={(event) => {
+              event.preventDefault();
+              void handlePttUp();
+            }}
+            disabled={isBusy || !openAIConnected}
+            aria-pressed={isRecording}
+            className={cn(
+              "relative flex h-20 w-20 items-center justify-center rounded-full border-4 transition-all select-none",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              isRecording
+                ? "border-destructive bg-destructive text-destructive-foreground scale-110 shadow-[0_0_40px_hsl(var(--destructive)/0.5)]"
+                : "border-primary bg-primary text-primary-foreground hover:scale-105 active:scale-95",
+            )}
+          >
+            <Mic className="h-8 w-8" />
+            {isRecording && (
+              <span className="absolute inset-0 rounded-full border-4 border-destructive/40 animate-ping" />
+            )}
+          </button>
+          <p className="text-xs text-muted-foreground">
+            {isRecording ? "鬆開按鈕送出回答" : "按住麥克風開始說話"}
+          </p>
+        </div>
 
+        {/* Text fallback */}
+        <div className="flex gap-2">
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Type and send to Aegis during the call"
+            placeholder="或在此輸入文字回覆（按 Enter 送出）"
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
                 void sendText();
               }
             }}
+            disabled={isBusy}
           />
-          <Button type="button" onClick={() => void sendText()}>
+          <Button type="button" variant="outline" onClick={() => void sendText()} disabled={isBusy || !input.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
