@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Copy, Download, FileText, ShieldAlert, Table2, TestTubeDiagonal } from "lucide-react";
+import { Copy, Download, FileSpreadsheet, FileText, FileType2, Loader2, ShieldAlert, Table2, TestTubeDiagonal } from "lucide-react";
 import { AegisShell } from "@/components/layout/AegisShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,9 @@ import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import { listSystems } from "@/lib/aegis/storage";
 import { evaluateValidationGaps } from "@/lib/aegis/validation-gaps";
 import type { AI_System_Profile, GeneratedControl, RiskTierResult, ValidationGapsResult } from "@/types/aegis";
+import { generateAuditPdf } from "@/lib/aegis/report-pdf";
+import { generateAuditDocx } from "@/lib/aegis/report-docx";
+import { generateAuditXlsx } from "@/lib/aegis/report-xlsx";
 
 type ReportType = "risk_summary" | "model_card" | "action_plan";
 
