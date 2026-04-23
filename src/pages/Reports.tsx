@@ -17,6 +17,7 @@ import {
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import { listSystems } from "@/lib/aegis/storage";
 import { evaluateValidationGaps } from "@/lib/aegis/validation-gaps";
+import { evaluateResidualRisk } from "@/lib/aegis/residual-risk";
 import type { AI_System_Profile, GeneratedControl, RiskTierResult, ValidationGapsResult } from "@/types/aegis";
 import { generateAuditPdf } from "@/lib/aegis/report-pdf";
 import { generateAuditDocx } from "@/lib/aegis/report-docx";
@@ -43,7 +44,14 @@ export default function ReportsPage() {
     const risk = evaluateRiskTier(selectedSystem.profile);
     const gaps = evaluateValidationGaps(selectedSystem.profile, risk);
     const controls = generateControls({ profile: selectedSystem.profile, risk, gaps }).selected;
-    const riskMarkdown = generateRiskSummaryReport(selectedSystem.profile, risk, gaps, controls);
+    const residual = evaluateResidualRisk(selectedSystem.id, selectedSystem.profile);
+    const riskMarkdown = generateRiskSummaryReport(
+      selectedSystem.profile,
+      risk,
+      gaps,
+      controls,
+      residual,
+    );
     const modelCardMarkdown = generateModelCardReport(selectedSystem.profile, risk, gaps);
     const actionPlanMarkdown = generateGovernanceActionPlanReport(selectedSystem.profile, controls);
     const wbsRows = buildGovernanceWbsRows(controls);

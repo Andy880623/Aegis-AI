@@ -4,6 +4,7 @@ import type {
   RiskTierResult,
   ValidationGapsResult,
 } from "@/types/aegis";
+import type { ResidualRiskResult } from "@/lib/aegis/residual-risk";
 
 function sectionList(items: string[]) {
   return items.length ? items.map((item) => `- ${item}`).join("\n") : "- None";
@@ -88,9 +89,33 @@ export function generateRiskSummaryReport(
   profile: AI_System_Profile,
   risk: RiskTierResult,
   gaps: ValidationGapsResult,
-  controls: GeneratedControl[]
+  controls: GeneratedControl[],
+  residual?: ResidualRiskResult,
 ) {
   const today = new Date().toISOString().slice(0, 10);
+  const residualSection = residual
+    ? `
+
+## Residual Risk Assessment
+- Inherent: **${residual.inherent.level}** (score ${residual.inherentScore}/100)
+- Residual: **${residual.residualLevel}** (score ${residual.residualScore}/100)
+- Risk Reduction: ${residual.reductionPercent}%
+- Controls Completed: ${residual.controlsCompletedCount} / ${residual.controlsApplicableCount}
+- Evidence Files on Record: ${residual.evidenceFilesCount}
+
+### Mitigation Rationale
+${sectionList(residual.rationale)}
+
+### Top Mitigated Controls
+${sectionList(
+  [...residual.breakdown]
+    .sort((a, b) => b.reductionPercent - a.reductionPercent)
+    .slice(0, 8)
+    .map((b) => `${b.control.id} ${b.control.title} — ${b.reductionPercent}% mitigation (${b.status})`),
+)}
+`
+    : "";
+
   return `# Risk Summary Report
 
 Date: ${today}
@@ -123,7 +148,7 @@ ${sectionList(gaps.safety.gaps)}
 ${sectionList(gaps.explainability.gaps)}
 
 ## Priority Controls
-${sectionList(controls.filter((c) => c.priority === "High").slice(0, 12).map((c) => `${c.id}: ${c.title}`))}
+${sectionList(controls.filter((c) => c.priority === "High").slice(0, 12).map((c) => `${c.id}: ${c.title}`))}${residualSection}
 `;
 }
 

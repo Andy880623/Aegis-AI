@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  ShieldAlert,
   UserCircle2,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -23,8 +24,9 @@ interface AegisShellProps {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Repository", href: "/systems", icon: ShieldCheck },
-  { label: "Assessment", href: "/workspace", icon: Bot },
+  { label: "Inherent Risk", href: "/workspace", icon: Bot },
   { label: "Controls", href: "/controls", icon: ClipboardList },
+  { label: "Residual Risk", href: "/residual", icon: ShieldAlert },
   { label: "Reports", href: "/reports", icon: Search },
   { label: "Settings", href: "/settings", icon: Settings },
 ];

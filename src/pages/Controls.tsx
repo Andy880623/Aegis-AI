@@ -1,14 +1,19 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, ExternalLink, Paperclip, Trash2, Upload } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AegisShell } from "@/components/layout/AegisShell";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  getCompletedControls,
+  addControlEvidence,
+  getAllControlEvidence,
+  getControlStatuses,
   listSystems,
-  setControlCompleted,
+  removeControlEvidence,
+  setControlStatus,
+  type ControlStatus,
 } from "@/lib/aegis/storage";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import { evaluateValidationGaps } from "@/lib/aegis/validation-gaps";
@@ -40,6 +45,7 @@ export default function ControlsPage() {
   const [selectedSystemId, setSelectedSystemId] = useState(systems[0]?.id ?? "");
   const [version, setVersion] = useState(0);
   const [expandedExamples, setExpandedExamples] = useState<Record<string, boolean>>({});
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const selectedSystem = systems.find((item) => item.id === selectedSystemId) ?? null;
   const result = useMemo(() => {
@@ -47,7 +53,8 @@ export default function ControlsPage() {
     const risk = evaluateRiskTier(selectedSystem.profile);
     const gaps = evaluateValidationGaps(selectedSystem.profile, risk);
     const contextBase = { profile: selectedSystem.profile, gaps };
-    const completedSet = new Set(getCompletedControls(selectedSystem.id));
+    const statusMap = getControlStatuses(selectedSystem.id);
+    const evidenceMap = getAllControlEvidence(selectedSystem.id);
 
     const rows = controlsKnowledgeBase.map((control) => {
       const context: ControlEvalContext = { profile: selectedSystem.profile, risk, gaps };
@@ -58,21 +65,57 @@ export default function ControlsPage() {
         applicable,
         priority,
         coverage: derivesRiskCoverage(contextBase, control.id),
-        completed: completedSet.has(control.id),
+        status: (statusMap[control.id] ?? "not_started") as ControlStatus,
+        evidence: evidenceMap[control.id] ?? [],
       };
     });
 
-    return { risk, gaps, rows };
+    const applicableRows = rows.filter((r) => r.applicable);
+    const completedCount = applicableRows.filter((r) => r.status === "completed").length;
+    return { risk, gaps, rows, applicableCount: applicableRows.length, completedCount };
   }, [selectedSystem, version]);
+
+  const handleStatusChange = (controlId: string, status: ControlStatus) => {
+    if (!selectedSystem) return;
+    setControlStatus(selectedSystem.id, controlId, status);
+    setVersion((prev) => prev + 1);
+  };
+
+  const handleEvidenceUpload = (controlId: string, files: FileList | null) => {
+    if (!selectedSystem || !files) return;
+    Array.from(files).forEach((file) => {
+      addControlEvidence(selectedSystem.id, controlId, {
+        name: file.name,
+        size: file.size,
+        mime_type: file.type || "application/octet-stream",
+      });
+    });
+    setVersion((prev) => prev + 1);
+  };
+
+  const handleEvidenceRemove = (controlId: string, evidenceId: string) => {
+    if (!selectedSystem) return;
+    removeControlEvidence(selectedSystem.id, controlId, evidenceId);
+    setVersion((prev) => prev + 1);
+  };
 
   return (
     <AegisShell>
       <div className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-semibold">Control Catalog & Execution</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            NIST-referenced control inventory with risk-aligned execution checklist.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">Control Catalog & Execution</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              NIST-referenced control inventory with risk-aligned execution checklist. Mark each
+              control's status and upload evidence to drive residual risk reduction.
+            </p>
+          </div>
+          <Link to="/residual">
+            <Button className="gap-2">
+              View Residual Risk
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         <Card>
@@ -220,19 +263,74 @@ export default function ControlsPage() {
                         </CollapsibleContent>
                       </Collapsible>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={control.completed}
+                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                      <select
+                        value={control.status}
                         disabled={!control.applicable}
-                        onCheckedChange={(next) => {
-                          if (!selectedSystem) return;
-                          setControlCompleted(selectedSystem.id, control.id, !!next);
-                          setVersion((prev) => prev + 1);
+                        onChange={(event) =>
+                          handleStatusChange(control.id, event.target.value as ControlStatus)
+                        }
+                        className="rounded-md border border-border bg-background px-2 py-1 text-xs disabled:opacity-50"
+                      >
+                        <option value="not_started">Not Started</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Paperclip className="h-3 w-3" />
+                        <span>
+                          {control.evidence.length} file{control.evidence.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      <input
+                        ref={(el) => (fileInputs.current[control.id] = el)}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(event) => {
+                          handleEvidenceUpload(control.id, event.target.files);
+                          event.target.value = "";
                         }}
                       />
-                      <span className="text-xs text-muted-foreground">Done</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!control.applicable}
+                        onClick={() => fileInputs.current[control.id]?.click()}
+                        className="gap-1 h-7 text-xs"
+                      >
+                        <Upload className="h-3 w-3" />
+                        Upload evidence
+                      </Button>
                     </div>
                   </div>
+                  {control.evidence.length > 0 && (
+                    <div className="mt-3 rounded-md border border-dashed border-border bg-muted/20 p-2 space-y-1">
+                      {control.evidence.map((file) => (
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between gap-2 text-xs"
+                        >
+                          <div className="flex items-center gap-2 text-muted-foreground truncate">
+                            <Paperclip className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{file.name}</span>
+                            <span className="text-muted-foreground/70">
+                              ({Math.round(file.size / 1024)} KB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleEvidenceRemove(control.id, file.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Remove evidence"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </CardContent>
