@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bot, Loader2, Mic, MicOff, Save, Send } from "lucide-react";
+import { Loader2, Mic, MicOff, Save, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { defaultSystemProfile, normalizeProfile } from "@/lib/aegis/schema";
 import { upsertSystem } from "@/lib/aegis/storage";
@@ -9,6 +8,7 @@ import { createRealtimeVoiceSession, type RealtimeVoiceSession } from "@/lib/aeg
 import { generateAndrewTurn, hasOpenAIConfigured } from "@/lib/aegis/chatgpt";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import type { AI_System_Profile } from "@/types/aegis";
+import { ZoomCallShell } from "./ZoomCallShell";
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -424,25 +424,39 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
   };
 
   return (
-    <Card className="h-full bg-surface">
-      <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            Aegis Realtime Voice Interview
-          </span>
-          <span className="text-xs text-muted-foreground">{progress}%</span>
-        </CardTitle>
-        <div className="h-2 overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+    <div className="flex h-full flex-col gap-3">
+      <ZoomCallShell
+        isAiSpeaking={isBusy || (connected && chat[chat.length - 1]?.role === "assistant")}
+        isAiListening={connected}
+        aiCaption={
+          [...chat].reverse().find((m) => m.role === "assistant")?.text?.slice(0, 140)
+        }
+        userCaption={
+          [...chat].reverse().find((m) => m.role === "user")?.text?.slice(0, 100)
+        }
+        onEndCall={connected ? stopCall : undefined}
+      >
+        <div className="px-4 py-2 flex items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="text-muted-foreground">Progress</span>
+            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="font-mono text-muted-foreground">{progress}%</span>
+          </div>
+          <div className="text-muted-foreground">
+            Realtime: <span className={openAIConnected ? "text-emerald-400" : "text-amber-400"}>
+              {openAIConnected ? "Ready" : "Not configured"}
+            </span>
+            {" · "}Call: <span className={connected ? "text-emerald-400" : "text-muted-foreground"}>
+              {connected ? "Live" : "Idle"}
+            </span>
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground">
-          ChatGPT Realtime: {openAIConnected ? "Configured" : "Not configured"} | Call: {connected ? "Live" : "Idle"}
-        </div>
-      </CardHeader>
+      </ZoomCallShell>
 
-      <CardContent className="flex h-[calc(100vh-220px)] flex-col gap-3">
-        <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-muted/20 p-3 space-y-3">
+      <div className="flex flex-1 flex-col gap-3 rounded-xl border border-border bg-card p-3">
+        <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-muted/20 p-3 space-y-2 max-h-[260px]">
           {chat.map((message, idx) => (
             <div
               key={`${message.role}-${idx}`}
@@ -456,7 +470,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
           {isBusy ? (
             <div className="max-w-[88%] rounded-lg px-3 py-2 text-sm bg-aiBubble text-foreground flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Connecting realtime call...
+              Aegis is processing...
             </div>
           ) : null}
         </div>
@@ -501,7 +515,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
             Complete interview and keep questionnaire editable
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

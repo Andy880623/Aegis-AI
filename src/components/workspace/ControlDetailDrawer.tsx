@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { WandSparkles } from "lucide-react";
+import { WandSparkles, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,14 +11,17 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { aiGuidanceEnabled, refineControlTemplateWithAI } from "@/lib/aegis/ai-refine";
 import type { GeneratedControl } from "@/types/aegis";
+import { EvidenceUploader } from "./EvidenceUploader";
+import { clausesForCategory, getStandard } from "@/lib/aegis/standards";
 
 interface ControlDetailDrawerProps {
   control: GeneratedControl | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  systemId?: string | null;
 }
 
-export function ControlDetailDrawer({ control, open, onOpenChange }: ControlDetailDrawerProps) {
+export function ControlDetailDrawer({ control, open, onOpenChange, systemId = null }: ControlDetailDrawerProps) {
   const [isRefining, setIsRefining] = useState(false);
   const [refined, setRefined] = useState(control?.how_to_template ?? null);
 
@@ -27,6 +30,7 @@ export function ControlDetailDrawer({ control, open, onOpenChange }: ControlDeta
   }, [control]);
 
   const template = refined ?? control?.how_to_template ?? null;
+  const clauses = control ? clausesForCategory(control.category) : [];
 
   const handleRefine = async () => {
     if (!control || !aiGuidanceEnabled) return;
@@ -38,7 +42,7 @@ export function ControlDetailDrawer({ control, open, onOpenChange }: ControlDeta
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
         {control && template ? (
           <>
             <SheetHeader>
@@ -103,6 +107,32 @@ export function ControlDetailDrawer({ control, open, onOpenChange }: ControlDeta
                     <li key={item}>- {item}</li>
                   ))}
                 </ul>
+              </div>
+
+              {clauses.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold flex items-center gap-1.5">
+                    <BookMarked className="h-3.5 w-3.5" />
+                    Aligned standards
+                  </h4>
+                  <ul className="mt-2 space-y-1 text-xs">
+                    {clauses.map((c) => {
+                      const std = getStandard(c.standard);
+                      return (
+                        <li key={`${c.standard}-${c.clause}`}>
+                          <span className="text-foreground font-medium">{std.short}</span>
+                          <span className="text-muted-foreground"> {c.clause} — {c.title}</span>
+                          <a href={std.url} target="_blank" rel="noreferrer" className="ml-1 text-cyan-400 hover:underline">[source]</a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-border">
+                <h4 className="text-sm font-semibold mb-3">AI Compliance Verification</h4>
+                <EvidenceUploader control={control} systemId={systemId} />
               </div>
             </div>
           </>
