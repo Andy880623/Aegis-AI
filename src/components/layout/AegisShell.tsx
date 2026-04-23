@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
+  BookOpen,
   Bot,
   ChevronLeft,
   ChevronRight,
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Controls", href: "/controls", icon: ClipboardList },
   { label: "Residual Risk", href: "/residual", icon: ShieldAlert },
   { label: "Reports", href: "/reports", icon: Search },
+  { label: "Knowledge Base", href: "/knowledge", icon: BookOpen },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
