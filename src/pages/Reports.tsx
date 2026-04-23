@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
-import { Copy, Download, FileText, ShieldAlert, Table2, TestTubeDiagonal } from "lucide-react";
+import { Copy, Download, FileSpreadsheet, FileText, FileType2, Loader2, ShieldAlert, Table2, TestTubeDiagonal } from "lucide-react";
 import { AegisShell } from "@/components/layout/AegisShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,9 @@ import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import { listSystems } from "@/lib/aegis/storage";
 import { evaluateValidationGaps } from "@/lib/aegis/validation-gaps";
 import type { AI_System_Profile, GeneratedControl, RiskTierResult, ValidationGapsResult } from "@/types/aegis";
+import { generateAuditPdf } from "@/lib/aegis/report-pdf";
+import { generateAuditDocx } from "@/lib/aegis/report-docx";
+import { generateAuditXlsx } from "@/lib/aegis/report-xlsx";
 
 type ReportType = "risk_summary" | "model_card" | "action_plan";
 
@@ -31,6 +34,7 @@ export default function ReportsPage() {
   const systems = listSystems();
   const [activeReport, setActiveReport] = useState<ReportType>("risk_summary");
   const [systemId, setSystemId] = useState(systems[0]?.id ?? "");
+  const [exporting, setExporting] = useState<null | "pdf" | "docx" | "xlsx">(null);
 
   const selectedSystem = systems.find((item) => item.id === systemId) ?? null;
 
@@ -89,6 +93,38 @@ export default function ReportsPage() {
     downloadBlob(new Blob([html], { type: "application/msword;charset=utf-8" }), `${safeSystemName}-${suffix}.doc`);
   };
 
+  const exportAuditPack = async (kind: "pdf" | "docx" | "xlsx") => {
+    if (!selectedSystem || !computed) return;
+    setExporting(kind);
+    try {
+      const safeSystemName = makeSafeFileName(selectedSystem.profile.system_name || "aegis");
+      const payload = {
+        profile: selectedSystem.profile,
+        risk: computed.risk,
+        gaps: computed.gaps,
+        controls: computed.controls,
+        systemId: selectedSystem.id,
+      };
+      let blob: Blob;
+      let filename: string;
+      if (kind === "pdf") {
+        blob = generateAuditPdf(payload);
+        filename = `${safeSystemName}-audit-report.pdf`;
+      } else if (kind === "docx") {
+        blob = await generateAuditDocx(payload);
+        filename = `${safeSystemName}-audit-report.docx`;
+      } else {
+        blob = generateAuditXlsx(payload);
+        filename = `${safeSystemName}-audit-workbook.xlsx`;
+      }
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error("Audit export failed", err);
+    } finally {
+      setExporting(null);
+    }
+  };
+
   return (
     <AegisShell>
       <div className="space-y-5">
@@ -126,6 +162,51 @@ export default function ReportsPage() {
                 <SummaryMetric title="Risk Tier" value={computed?.risk.level ?? "-"} icon={ShieldAlert} />
                 <SummaryMetric title="Controls Selected" value={computed?.controls.length ?? 0} icon={TestTubeDiagonal} />
                 <SummaryMetric title="Report" value={labels[activeReport]} icon={FileText} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileType2 className="h-4 w-4 text-primary" />
+                  Audit-Grade Report Pack
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  One-click export of the full governance dossier — cover, TOC, risk determination, control matrix,
+                  AI-verified evidence log, standards alignment (EU AI Act / NIST / ISO 42001 / UK / SG / TW FSC), WBS,
+                  and sign-off page. Suitable for external audit and financial supervisory review.
+                </p>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => exportAuditPack("pdf")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                  Download PDF Report
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportAuditPack("docx")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "docx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileType2 className="h-4 w-4" />}
+                  Download Word (.docx)
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportAuditPack("xlsx")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "xlsx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+                  Download Excel WBS (.xlsx)
+                </Button>
               </CardContent>
             </Card>
 
