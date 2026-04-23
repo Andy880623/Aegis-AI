@@ -165,6 +165,51 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
 
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileType2 className="h-4 w-4 text-primary" />
+                  Audit-Grade Report Pack
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  One-click export of the full governance dossier — cover, TOC, risk determination, control matrix,
+                  AI-verified evidence log, standards alignment (EU AI Act / NIST / ISO 42001 / UK / SG / TW FSC), WBS,
+                  and sign-off page. Suitable for external audit and financial supervisory review.
+                </p>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => exportAuditPack("pdf")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                  Download PDF Report
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportAuditPack("docx")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "docx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileType2 className="h-4 w-4" />}
+                  Download Word (.docx)
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => exportAuditPack("xlsx")}
+                  disabled={!computed || exporting !== null}
+                  className="gap-2"
+                >
+                  {exporting === "xlsx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+                  Download Excel WBS (.xlsx)
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
               <Card>
                 <CardHeader>
