@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Mic, MicOff, Save, Send } from "lucide-react";
+import { Loader2, Mic, Save, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { defaultSystemProfile, normalizeProfile } from "@/lib/aegis/schema";
 import { upsertSystem } from "@/lib/aegis/storage";
-import { createRealtimeVoiceSession, type RealtimeVoiceSession } from "@/lib/aegis/realtime-voice";
 import { generateAndrewTurn, hasOpenAIConfigured } from "@/lib/aegis/chatgpt";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
+import {
+  createPttRecorder,
+  speakTaiwaneseMale,
+  transcribeAudioBlob,
+  type PttRecorderHandle,
+} from "@/lib/aegis/ptt-voice";
 import type { AI_System_Profile } from "@/types/aegis";
 import { ZoomCallShell } from "./ZoomCallShell";
 
