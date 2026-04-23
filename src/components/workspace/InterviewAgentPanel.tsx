@@ -308,13 +308,6 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
   const [chat, setChat] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      text: "你好，我是 Aegis 風險訪談助理。我會先做核心風險盤點，再視情況做深度盤點。請按住下方麥克風按鈕回答我的問題。",
-    },
-  ]);
-  // placeholder to keep diff context safe
-  const _ignore = [
-    {
-      role: "assistant" as const,
       text: "Hi, I'm the Aegis risk interview assistant. I'll start with a core risk intake and continue with a deep dive if needed. Please hold the microphone button below to answer my questions.",
     },
   ]);
