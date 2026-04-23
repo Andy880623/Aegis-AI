@@ -9,6 +9,7 @@ import Workspace from "./pages/Workspace";
 import AISystems from "./pages/AISystems";
 import AISystemDetail from "./pages/AISystemDetail";
 import ControlsPage from "./pages/Controls";
+import ResidualRisk from "./pages/ResidualRisk";
 import ReportsPage from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/systems" element={<AISystems />} />
           <Route path="/systems/:id" element={<AISystemDetail />} />
           <Route path="/controls" element={<ControlsPage />} />
+          <Route path="/residual" element={<ResidualRisk />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
 
