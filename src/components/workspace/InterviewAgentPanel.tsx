@@ -398,7 +398,7 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
       recorderRef.current = recorder;
       await recorder.start();
       setIsRecording(true);
-      setStatus("錄音中…放開按鈕後送出");
+      setStatus("Recording… release the button to send");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Microphone permission denied.");
       setIsRecording(false);
@@ -409,17 +409,17 @@ export function InterviewAgentPanel({ profile, systemId, onProfileChange, onPers
     const recorder = recorderRef.current;
     if (!recorder || !isRecording) return;
     setIsRecording(false);
-    setStatus("辨識中…");
+    setStatus("Transcribing…");
     try {
       const blob = await recorder.stop();
       recorderRef.current = null;
       if (!blob || blob.size < 800) {
-        setStatus("錄音太短，請按住按鈕並完整描述。");
+        setStatus("Recording too short — hold the button and describe fully.");
         return;
       }
       const text = await transcribeAudioBlob(blob);
       if (!text) {
-        setStatus("無法辨識聲音，請再試一次。");
+        setStatus("Couldn't recognize speech — please try again.");
         return;
       }
       setChat((prev) => [...prev, { role: "user", text }]);
