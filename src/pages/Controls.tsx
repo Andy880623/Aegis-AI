@@ -1,14 +1,19 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, ExternalLink, Paperclip, Trash2, Upload } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AegisShell } from "@/components/layout/AegisShell";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
-  getCompletedControls,
+  addControlEvidence,
+  getAllControlEvidence,
+  getControlStatuses,
   listSystems,
-  setControlCompleted,
+  removeControlEvidence,
+  setControlStatus,
+  type ControlStatus,
 } from "@/lib/aegis/storage";
 import { evaluateRiskTier } from "@/lib/aegis/risk-tier";
 import { evaluateValidationGaps } from "@/lib/aegis/validation-gaps";
@@ -40,6 +45,7 @@ export default function ControlsPage() {
   const [selectedSystemId, setSelectedSystemId] = useState(systems[0]?.id ?? "");
   const [version, setVersion] = useState(0);
   const [expandedExamples, setExpandedExamples] = useState<Record<string, boolean>>({});
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const selectedSystem = systems.find((item) => item.id === selectedSystemId) ?? null;
   const result = useMemo(() => {
@@ -47,7 +53,8 @@ export default function ControlsPage() {
     const risk = evaluateRiskTier(selectedSystem.profile);
     const gaps = evaluateValidationGaps(selectedSystem.profile, risk);
     const contextBase = { profile: selectedSystem.profile, gaps };
-    const completedSet = new Set(getCompletedControls(selectedSystem.id));
+    const statusMap = getControlStatuses(selectedSystem.id);
+    const evidenceMap = getAllControlEvidence(selectedSystem.id);
 
     const rows = controlsKnowledgeBase.map((control) => {
       const context: ControlEvalContext = { profile: selectedSystem.profile, risk, gaps };
@@ -58,21 +65,57 @@ export default function ControlsPage() {
         applicable,
         priority,
         coverage: derivesRiskCoverage(contextBase, control.id),
-        completed: completedSet.has(control.id),
+        status: (statusMap[control.id] ?? "not_started") as ControlStatus,
+        evidence: evidenceMap[control.id] ?? [],
       };
     });
 
-    return { risk, gaps, rows };
+    const applicableRows = rows.filter((r) => r.applicable);
+    const completedCount = applicableRows.filter((r) => r.status === "completed").length;
+    return { risk, gaps, rows, applicableCount: applicableRows.length, completedCount };
   }, [selectedSystem, version]);
+
+  const handleStatusChange = (controlId: string, status: ControlStatus) => {
+    if (!selectedSystem) return;
+    setControlStatus(selectedSystem.id, controlId, status);
+    setVersion((prev) => prev + 1);
+  };
+
+  const handleEvidenceUpload = (controlId: string, files: FileList | null) => {
+    if (!selectedSystem || !files) return;
+    Array.from(files).forEach((file) => {
+      addControlEvidence(selectedSystem.id, controlId, {
+        name: file.name,
+        size: file.size,
+        mime_type: file.type || "application/octet-stream",
+      });
+    });
+    setVersion((prev) => prev + 1);
+  };
+
+  const handleEvidenceRemove = (controlId: string, evidenceId: string) => {
+    if (!selectedSystem) return;
+    removeControlEvidence(selectedSystem.id, controlId, evidenceId);
+    setVersion((prev) => prev + 1);
+  };
 
   return (
     <AegisShell>
       <div className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-semibold">Control Catalog & Execution</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            NIST-referenced control inventory with risk-aligned execution checklist.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">Control Catalog & Execution</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              NIST-referenced control inventory with risk-aligned execution checklist. Mark each
+              control's status and upload evidence to drive residual risk reduction.
+            </p>
+          </div>
+          <Link to="/residual">
+            <Button className="gap-2">
+              View Residual Risk
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         <Card>
