@@ -34,6 +34,7 @@ export default function ReportsPage() {
   const systems = listSystems();
   const [activeReport, setActiveReport] = useState<ReportType>("risk_summary");
   const [systemId, setSystemId] = useState(systems[0]?.id ?? "");
+  const [exporting, setExporting] = useState<null | "pdf" | "docx" | "xlsx">(null);
 
   const selectedSystem = systems.find((item) => item.id === systemId) ?? null;
 
@@ -90,6 +91,38 @@ export default function ReportsPage() {
         : buildModelCardWordHtml(selectedSystem.profile, computed.risk, computed.gapItems);
     const suffix = activeReport === "risk_summary" ? "risk-summary-report" : "model-card";
     downloadBlob(new Blob([html], { type: "application/msword;charset=utf-8" }), `${safeSystemName}-${suffix}.doc`);
+  };
+
+  const exportAuditPack = async (kind: "pdf" | "docx" | "xlsx") => {
+    if (!selectedSystem || !computed) return;
+    setExporting(kind);
+    try {
+      const safeSystemName = makeSafeFileName(selectedSystem.profile.system_name || "aegis");
+      const payload = {
+        profile: selectedSystem.profile,
+        risk: computed.risk,
+        gaps: computed.gaps,
+        controls: computed.controls,
+        systemId: selectedSystem.id,
+      };
+      let blob: Blob;
+      let filename: string;
+      if (kind === "pdf") {
+        blob = generateAuditPdf(payload);
+        filename = `${safeSystemName}-audit-report.pdf`;
+      } else if (kind === "docx") {
+        blob = await generateAuditDocx(payload);
+        filename = `${safeSystemName}-audit-report.docx`;
+      } else {
+        blob = generateAuditXlsx(payload);
+        filename = `${safeSystemName}-audit-workbook.xlsx`;
+      }
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error("Audit export failed", err);
+    } finally {
+      setExporting(null);
+    }
   };
 
   return (
