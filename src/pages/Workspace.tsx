@@ -139,9 +139,9 @@ export default function Workspace() {
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">Assessment</h1>
+            <h1 className="text-2xl font-semibold">Inherent Risk Assessment</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Aegis runs a realtime two-way voice interview on the left. The questionnaire on the right is auto-filled and editable.
+              按住左側麥克風與 Aegis 進行語音訪談（台灣男聲），右側問卷會即時自動填寫並可手動編輯。Residual Risk Assessment 會在完成 Controls 後自動產生。
             </p>
           </div>
           <Link to={`/workspace?new=${Date.now()}`}>
@@ -149,7 +149,7 @@ export default function Workspace() {
           </Link>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[40%_60%]">
+        <div className="grid gap-4 xl:grid-cols-[44%_56%]">
           <InterviewAgentPanel
             key={interviewInstanceKey}
             profile={profile}
