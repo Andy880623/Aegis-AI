@@ -263,19 +263,74 @@ export default function ControlsPage() {
                         </CollapsibleContent>
                       </Collapsible>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={control.completed}
+                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
+                      <select
+                        value={control.status}
                         disabled={!control.applicable}
-                        onCheckedChange={(next) => {
-                          if (!selectedSystem) return;
-                          setControlCompleted(selectedSystem.id, control.id, !!next);
-                          setVersion((prev) => prev + 1);
+                        onChange={(event) =>
+                          handleStatusChange(control.id, event.target.value as ControlStatus)
+                        }
+                        className="rounded-md border border-border bg-background px-2 py-1 text-xs disabled:opacity-50"
+                      >
+                        <option value="not_started">Not Started</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Paperclip className="h-3 w-3" />
+                        <span>
+                          {control.evidence.length} file{control.evidence.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      <input
+                        ref={(el) => (fileInputs.current[control.id] = el)}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(event) => {
+                          handleEvidenceUpload(control.id, event.target.files);
+                          event.target.value = "";
                         }}
                       />
-                      <span className="text-xs text-muted-foreground">Done</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!control.applicable}
+                        onClick={() => fileInputs.current[control.id]?.click()}
+                        className="gap-1 h-7 text-xs"
+                      >
+                        <Upload className="h-3 w-3" />
+                        Upload evidence
+                      </Button>
                     </div>
                   </div>
+                  {control.evidence.length > 0 && (
+                    <div className="mt-3 rounded-md border border-dashed border-border bg-muted/20 p-2 space-y-1">
+                      {control.evidence.map((file) => (
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between gap-2 text-xs"
+                        >
+                          <div className="flex items-center gap-2 text-muted-foreground truncate">
+                            <Paperclip className="h-3 w-3 shrink-0" />
+                            <span className="truncate">{file.name}</span>
+                            <span className="text-muted-foreground/70">
+                              ({Math.round(file.size / 1024)} KB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleEvidenceRemove(control.id, file.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label="Remove evidence"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </CardContent>
