@@ -1,12 +1,23 @@
 import {
   Activity,
   ArrowRight,
+  BookOpen,
+  Bot,
+  CheckCircle2,
   ClipboardCheck,
+  ClipboardList,
+  Database,
   FileText,
   Gauge,
+  LayoutDashboard,
+  Lightbulb,
   Lock,
+  PlayCircle,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Target,
+  Users,
   Workflow,
   Zap,
 } from "lucide-react";
@@ -14,6 +25,7 @@ import { forwardRef, type ComponentType } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
+import { InteractiveWalkthrough } from "@/components/landing/InteractiveWalkthrough";
 
 export default function Landing() {
   return (
@@ -55,21 +67,30 @@ export default function Landing() {
           </p>
 
           <div className="mt-10 flex animate-slide-up flex-col items-center justify-center gap-3 [animation-delay:240ms] sm:flex-row">
-            <Link to="/interview">
+            <Link to="/dashboard">
               <Button
                 size="lg"
                 className="group h-12 gap-2 bg-gradient-to-r from-primary to-accent-violet px-6 text-primary-foreground shadow-[0_0_32px_-8px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_48px_-4px_hsl(var(--primary)/0.8)]"
               >
-                Start AI Governance Interview
+                Open the demo dashboard
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
-            <a href="#how-it-works">
+            <a href="#walkthrough">
               <Button size="lg" variant="outline" className="h-12 gap-2 border-border bg-card/40 backdrop-blur">
-                <Sparkles className="h-4 w-4" />
-                See how it works
+                <PlayCircle className="h-4 w-4" />
+                Watch the 30-second walkthrough
               </Button>
             </a>
+          </div>
+
+          {/* Sample data callout */}
+          <div className="mx-auto mt-8 flex max-w-xl animate-fade-in items-center justify-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-[11px] text-muted-foreground [animation-delay:360ms]">
+            <Sparkles className="h-3 w-3 text-primary" />
+            <span>
+              <span className="text-foreground">Sample data is pre-loaded</span> — Atlas Support
+              Copilot, 6 controls, evidence files, and a residual risk score are ready to explore.
+            </span>
           </div>
 
           {/* Telemetry strip */}
@@ -91,6 +112,25 @@ export default function Landing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* INTERACTIVE WALKTHROUGH (demo video) */}
+      <section id="walkthrough" className="relative border-t border-border bg-background/40">
+        <div className="aegis-container py-24">
+          <SectionHeader
+            eyebrow="Demo video"
+            title="Watch the full workflow play out — automatically."
+            subtitle="An auto-playing walkthrough of the six steps you'll take, from system registration to audit-ready report. Click any step to jump."
+          />
+          <div className="mx-auto mt-12 max-w-5xl">
+            <InteractiveWalkthrough />
+          </div>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-xs text-muted-foreground">
+            Want to try it with real data? The demo system{" "}
+            <span className="text-foreground">Atlas Support Copilot</span> is already in your
+            workspace — open the dashboard to explore.
+          </p>
         </div>
       </section>
 
@@ -122,6 +162,101 @@ export default function Landing() {
               title="We generate the plan"
               description="A prioritized control checklist plus three downloadable governance documents — ready for audit."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* STEP-BY-STEP WALKTHROUGH (deep dive — from old Introduction page) */}
+      <section id="step-by-step" className="relative border-t border-border">
+        <div className="aegis-container py-24">
+          <SectionHeader
+            eyebrow="Step-by-step guide"
+            title="What happens on each page."
+            subtitle="Six pages, one continuous evidence chain. Click any card to jump straight in."
+          />
+
+          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {STEP_DETAILS.map((step) => (
+              <Link to={step.route} key={step.num} className="group">
+                <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_8px_32px_-12px_hsl(var(--primary)/0.4)]">
+                  <div className="flex items-start justify-between">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-gradient-to-br ${step.tint} text-foreground`}
+                    >
+                      <step.icon className="h-5 w-5" />
+                    </div>
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                      STEP {step.num}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-foreground">{step.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+                  <ul className="mt-4 space-y-1.5">
+                    {step.actions.map((a) => (
+                      <li key={a} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary/70" />
+                        {a}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-5 flex items-center gap-1 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                    Open page <ArrowRight className="h-3 w-3" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CORE CAPABILITIES */}
+      <section className="relative border-t border-border bg-background/40">
+        <div className="aegis-container py-24">
+          <SectionHeader
+            eyebrow="Core capabilities"
+            title="What makes Aegis different from a spreadsheet."
+            subtitle="A focused stack of governance primitives — not a generic GRC platform."
+          />
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {CAPABILITIES.map((c) => (
+              <div
+                key={c.title}
+                className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-5 backdrop-blur transition-all hover:border-primary/40 hover:bg-card/70"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-accent-violet/20 text-primary">
+                  <c.icon className="h-4 w-4" />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-foreground">{c.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* BEST PRACTICES */}
+      <section className="relative border-t border-border">
+        <div className="aegis-container py-24">
+          <SectionHeader
+            eyebrow="Best practices"
+            title="Get the most out of the platform."
+            subtitle="Four habits that separate a one-time assessment from a living governance program."
+          />
+          <div className="mx-auto mt-12 grid max-w-4xl gap-3 sm:grid-cols-2">
+            {BEST_PRACTICES.map((tip) => (
+              <div
+                key={tip.title}
+                className="flex items-start gap-3 rounded-xl border border-border bg-card/40 p-4 backdrop-blur"
+              >
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <tip.icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{tip.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tip.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -158,17 +293,25 @@ export default function Landing() {
                 Ready to make your AI system <span className="text-gradient">audit-ready</span>?
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                Start the interview now — no sign-up required for the demo. Your data stays in your environment.
+                The demo workspace is already populated. Open the dashboard to explore — or start a fresh interview for your own AI system.
               </p>
-              <Link to="/interview" className="mt-8 inline-flex">
-                <Button
-                  size="lg"
-                  className="group h-12 gap-2 bg-gradient-to-r from-primary to-accent-violet px-6 text-primary-foreground shadow-[0_0_32px_-8px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_48px_-4px_hsl(var(--primary)/0.8)]"
-                >
-                  Start AI Governance Interview
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Button>
-              </Link>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <Link to="/dashboard">
+                  <Button
+                    size="lg"
+                    className="group h-12 gap-2 bg-gradient-to-r from-primary to-accent-violet px-6 text-primary-foreground shadow-[0_0_32px_-8px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_48px_-4px_hsl(var(--primary)/0.8)]"
+                  >
+                    Explore the demo dashboard
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </Button>
+                </Link>
+                <Link to="/workspace">
+                  <Button size="lg" variant="outline" className="h-12 gap-2 border-border bg-card/40 backdrop-blur">
+                    <Bot className="h-4 w-4" />
+                    Start a new interview
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -176,6 +319,109 @@ export default function Landing() {
     </AppLayout>
   );
 }
+
+const STEP_DETAILS = [
+  {
+    num: "01",
+    icon: ShieldCheck,
+    title: "Repository — register the system",
+    route: "/systems",
+    tint: "from-emerald-500/20 to-emerald-500/5",
+    desc: "Inventory every AI system with use case, model provider, data sources, and deployment surface.",
+    actions: ["Add a new AI system", "Edit metadata", "Filter by domain or risk"],
+  },
+  {
+    num: "02",
+    icon: Bot,
+    title: "Inherent Risk — AI-led interview",
+    route: "/workspace",
+    tint: "from-violet-500/20 to-violet-500/5",
+    desc: "A conversational agent extracts risk-relevant attributes and computes the inherent risk tier.",
+    actions: ["Conversational intake", "Deterministic scoring", "Validation gap detection"],
+  },
+  {
+    num: "03",
+    icon: LayoutDashboard,
+    title: "Dashboard — portfolio view",
+    route: "/dashboard",
+    tint: "from-sky-500/20 to-sky-500/5",
+    desc: "See risk distribution, control progress, and recent activity across every registered system.",
+    actions: ["Risk distribution", "Activity feed", "Quick navigation"],
+  },
+  {
+    num: "04",
+    icon: ClipboardList,
+    title: "Controls — apply & evidence",
+    route: "/controls",
+    tint: "from-amber-500/20 to-amber-500/5",
+    desc: "Auto-generated control checklist tied to your risk tier. Upload evidence and mark progress.",
+    actions: ["Recommended controls", "Evidence uploader", "Status tracking"],
+  },
+  {
+    num: "05",
+    icon: ShieldAlert,
+    title: "Residual Risk — evidence-weighted",
+    route: "/residual",
+    tint: "from-rose-500/20 to-rose-500/5",
+    desc: "Recalculates in real time: completed + evidence = 100%, completed alone = 50%, in progress = 25%.",
+    actions: ["Live recompute", "Evidence weighting", "Gap analysis"],
+  },
+  {
+    num: "06",
+    icon: FileText,
+    title: "Reports — export deliverables",
+    route: "/reports",
+    tint: "from-cyan-500/20 to-cyan-500/5",
+    desc: "One-click export of audit-ready PDF, DOCX, and XLSX reports aligned to NIST AI RMF and ISO 42001.",
+    actions: ["NIST AI RMF", "ISO 42001", "EU AI Act mapping"],
+  },
+];
+
+const CAPABILITIES = [
+  {
+    icon: Database,
+    title: "Knowledge Base (RAG)",
+    desc: "Built-in regulatory knowledge base — AI cites NIST, ISO, and EU AI Act provisions in responses.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI-led interviews",
+    desc: "Conversational intake replaces tedious forms and auto-extracts structured profile data.",
+  },
+  {
+    icon: Target,
+    title: "Deterministic risk engine",
+    desc: "Rule-based scoring — explainable and reproducible, never an opaque AI verdict.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Evidence-driven residual risk",
+    desc: "Completed + evidence = 100%, completed alone = 50%, in progress = 25%.",
+  },
+];
+
+const BEST_PRACTICES = [
+  {
+    icon: Workflow,
+    title: "Walk through all six steps in order",
+    desc: "Each step's output feeds the next. First-time users should complete one full pass before iterating.",
+  },
+  {
+    icon: Users,
+    title: "Bring stakeholders into the interview",
+    desc: "Run the interview with product, engineering, and legal/risk together — accuracy improves dramatically.",
+  },
+  {
+    icon: Zap,
+    title: "Keep evidence current",
+    desc: "Evidence uploads on the Controls page recompute residual risk live. Refresh after every system change.",
+  },
+  {
+    icon: BookOpen,
+    title: "Use the Knowledge Base liberally",
+    desc: "When in doubt about a regulatory clause, ask the Knowledge Base — answers cite the actual provisions.",
+  },
+];
 
 function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
